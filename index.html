@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Daily Budget</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1fb985">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💰%3C/text%3E%3C/svg%3E">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f4f6f9;--card:#fff;--tx:#1b2330;--mu:#6b7686;--bd:#e3e7ee;--ac:#3b5bdb;--gr:#16a34a;--gb:#dcfce7;--rd:#dc2626;--rb:#fee2e2;--gy:#9aa3b2;--yb:#eef0f4;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f141b;--card:#1a212b;--tx:#e8ecf2;--mu:#98a3b3;--bd:#2a3340;--ac:#7c93f5;--gr:#4ade80;--gb:#12351f;--rd:#f87171;--rb:#3d1a1a;--gy:#6b7686;--yb:#232c38;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f141b;--card:#1a212b;--tx:#e8ecf2;--mu:#98a3b3;--bd:#2a3340;--ac:#7c93f5;--gr:#4ade80;--gb:#12351f;--rd:#f87171;--rb:#3d1a1a;--gy:#6b7686;--yb:#232c38;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#app{max-width:880px;margin:0 auto;padding:14px 14px 90px}
+h2{margin:4px 0 12px;font-size:20px}h3{margin:0 0 8px;font-size:15px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.k{color:var(--mu);font-size:12px}.v{font-size:19px;font-weight:650}
+.hero{text-align:center;transition:background .2s}.hero .big{font-size:34px;font-weight:750}
+.g{color:var(--gr)}.r{color:var(--rd)}.n{color:var(--gy)}
+.hero.g{background:var(--gb)}.hero.r{background:var(--rb)}.hero.n{background:var(--yb)}
+.bar{height:10px;border-radius:9px;background:var(--bd);overflow:hidden;margin:10px 0}
+.bar i{display:block;height:100%;background:var(--gy);transition:width .3s}.g .bar i{background:var(--gr)}.r .bar i{background:var(--rd)}
+label{display:block;font-size:12px;color:var(--mu);margin:8px 0 3px}
+input,select{width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
+button{font:inherit;padding:10px 14px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);cursor:pointer}
+button.p{background:var(--ac);border-color:var(--ac);color:#fff}button.d{color:var(--rd)}button.s{padding:5px 9px;font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.row>button{flex:0 0 auto}
+.banner{background:var(--rb);border:1px solid var(--rd);border-radius:12px;padding:10px;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--bd)}th:first-child,td:first-child{text-align:left}
+tr.c{cursor:pointer}.sw{overflow-x:auto}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.cal b{font-size:11px;text-align:center;color:var(--mu)}
+.cd{min-height:62px;border-radius:8px;padding:4px;font-size:11px;cursor:pointer;background:var(--yb);border:1px solid transparent}
+.cd.g{background:var(--gb)}.cd.r{background:var(--rb)}.cd.t{border-color:var(--ac)}.cd span{display:block;font-weight:650;font-size:12px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav button{flex:1;border:0;border-radius:0;background:none;font-size:11px;padding:9px 2px;color:var(--mu)}nav button.on{color:var(--ac);font-weight:700}
+@media(min-width:760px){nav{position:sticky;top:0;bottom:auto;border-top:0;border-bottom:1px solid var(--bd)}nav button{font-size:14px}#app{padding-bottom:30px}}
+#mod{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:14px;z-index:20}
+#mod.on{display:flex}#mb{background:var(--card);border-radius:16px;padding:16px;max-width:460px;width:100%;max-height:88vh;overflow:auto}
+.opt{display:block;width:100%;text-align:left;margin:6px 0}.opt.on{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac)}
+#toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:9px 14px;border-radius:10px;display:none;z-index:30;font-size:13px}
+.ex{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd)}
+:root{--bg:#ebe9f4;--card:#fff;--tx:#14131a;--mu:#7c7a8c;--bd:#eeedf4;--ac:#1fb985;--gr:#12a874;--gb:#e1f6ed;--rd:#ef4f56;--rb:#fdeaec;--gy:#a9a7b8;--yb:#f1f0f7;--glow:#f7c6e0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15131e;--card:#201e2d;--tx:#f1effa;--mu:#9d99b3;--bd:#2f2c40;--ac:#2ed3a0;--gr:#34d399;--gb:#113a2e;--rd:#ff7b82;--rb:#442029;--gy:#6f6c85;--yb:#2a2839;--glow:#3b1f3e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15131e;--card:#201e2d;--tx:#f1effa;--mu:#9d99b3;--bd:#2f2c40;--ac:#2ed3a0;--gr:#34d399;--gb:#113a2e;--rd:#ff7b82;--rb:#442029;--gy:#6f6c85;--yb:#2a2839;--glow:#3b1f3e;color-scheme:dark}
+body{background:radial-gradient(120% 55% at 100% 100%,var(--glow),transparent 65%),var(--bg) fixed;transition:background .25s,color .25s}
+#app{padding-top:56px}h2{font-size:26px;font-weight:780;letter-spacing:-.5px}
+.card{border:0;border-radius:24px;box-shadow:0 4px 18px rgba(60,50,100,.08);transition:background .25s}
+.hero .big{font-size:40px;letter-spacing:-1px}.v{font-size:21px;font-weight:720}
+button,input,select{border-radius:999px}input,select{border:0;background:var(--yb);padding:11px 14px}
+button{border:0;background:var(--yb)}button.p{background:var(--ac);color:#fff;font-weight:650}button.s{border-radius:999px}
+.banner{border:0;border-radius:18px}.cd{border-radius:12px}.bar{height:12px}
+nav{left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom,0px));border:0;border-radius:26px;padding:4px;box-shadow:0 6px 26px rgba(60,50,100,.18)}
+nav button{background:none;border-radius:20px}nav button.on{background:var(--gb);color:var(--ac)}
+#fab{position:fixed;right:20px;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:58px;height:58px;padding:0;border-radius:20px;background:var(--ac);color:#fff;font-size:32px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(31,185,133,.45);z-index:6}
+#tg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);right:14px;width:42px;height:42px;padding:0;border-radius:50%;background:var(--card);font-size:19px;box-shadow:0 4px 14px rgba(60,50,100,.15);z-index:8;display:flex;align-items:center;justify-content:center}
+@media(min-width:760px){nav{position:sticky;top:8px;bottom:auto;left:auto;right:auto;margin:8px auto 0;max-width:800px;box-shadow:0 4px 18px rgba(60,50,100,.12)}#app{padding-top:14px}#fab{bottom:28px}}
+</style></head><body>
+<button id="tg" onclick="toggleTheme()" aria-label="Toggle night mode"></button><button id="fab" onclick="go('add')" aria-label="Add expense">+</button>
+<nav id="nav"></nav><div id="app"></div><div id="mod"><div id="mb"></div></div><div id="toast"></div>
+<script>
+"use strict";
+const KEY="dailyBudgetV1";let S,view="dash",hf="month",busy=null,memo=null;
+const defState=()=>({budgets:{},expenses:[],closed:{},adjHist:[],cur:"₹",month:null});
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,"0");
+const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const pd=s=>new Date(s+"T00:00:00");
+const addD=(s,n)=>{const d=pd(s);d.setDate(d.getDate()+n);return ymd(d)};
+const today=()=>ymd(new Date());
+const mk=s=>s.slice(0,7);
+const dim=(y,m)=>new Date(y,m,0).getDate();
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fm=n=>S.cur+Number(n).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2});
+const fd=s=>pd(s).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+const r2=n=>Math.round(n*100)/100;
+function toast(m){const t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>t.style.display="none",2600)}
+function openModal(h){$("mb").innerHTML=h;$("mod").classList.add("on")}
+function closeModal(){$("mod").classList.remove("on");memo=null}
+$("mod").addEventListener("click",e=>{if(e.target.id==="mod")closeModal()});
+function ask(msg,cb){window._cb=cb;openModal(`<p>${msg}</p><div class="row"><button onclick="closeModal()">Cancel</button><button class="p" onclick="closeModal();_cb()">Confirm</button></div>`)}
+
+/* ---------- storage ---------- */
+function loadLocalData(){try{S=Object.assign(defState(),JSON.parse(localStorage.getItem(KEY)||"{}"))}catch(e){S=defState()}}
+function saveLocalData(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("Could not save: storage unavailable")}}
+
+/* ---------- budget engine (no UI) ---------- */
+function budgetDates(b){const r=[];for(let d=b.start;d<=b.end;d=addD(d,1))r.push(d);return r}
+function calculateDailySpending(date){return r2(S.expenses.reduce((a,e)=>e.date===date?a+e.amount:a,0))}
+// Derived, never mutated: allocations are recomputed from budget + expenses + adjustment choices, so nothing can double-count.
+function calculateMonthlyBudget(key,ov){
+  const b=S.budgets[key];if(!b)return null;
+  const ds=budgetDates(b),n=ds.length,base=b.total/n;
+  const alloc=ds.map(()=>base),inn=ds.map(()=>0),meth={},fix={};
+  S.adjHist.forEach(h=>{if(mk(h.date)!==key)return;if(h.type==="fix")fix[h.date]=h;else meth[h.date]=h});
+  if(ov)meth[ov.date]=ov;
+  const spent=ds.map(calculateDailySpending),out=ds.map(()=>null);
+  const spread=(i,delta)=>{const m=n-i-1;for(let j=i+1;j<n;j++){alloc[j]+=delta/m;inn[j]+=delta/m}};
+  ds.forEach((d,i)=>{
+    if(fix[d]&&alloc[i]<0&&i<n-1){const def=-alloc[i];inn[i]+=def;alloc[i]=0;spread(i,-def)}
+    const h=meth[d];if(!h)return;
+    const diff=alloc[i]-spent[i];if(Math.abs(diff)<0.005||i>=n-1)return;
+    out[i]={method:h.method,type:diff<0?"Overspent":"Saved",amount:Math.abs(diff)};
+    if(h.method==="next"){alloc[i+1]+=diff;inn[i+1]+=diff}else spread(i,diff);
+  });
+  return ds.map((date,i)=>({date,alloc:alloc[i],base,spent:spent[i],rem:alloc[i]-spent[i],inn:inn[i],out:out[i],closed:!!S.closed[date]}));
+}
+const getDay=date=>{const k=mk(date);const m=calculateMonthlyBudget(k);return m&&m.find(x=>x.date===date)||null};
+function calculateDailyAllocation(date){const d=getDay(date);return d?d.alloc:null}
+const stat=d=>d.spent<=0?"n":(d.spent<=d.alloc+0.005?"g":"r");
+
+/* ---------- adjustments ---------- */
+function pendingDay(key){ // oldest closed-out candidate: past, not closed, has spend or is yesterday
+  const m=calculateMonthlyBudget(key);if(!m)return null;const t=today();
+  return m.find(d=>d.date<t&&!d.closed&&(d.spent>0||d.date===addD(t,-1)))||null}
+function openAdjust(date){
+  const key=mk(date),m=calculateMonthlyBudget(key),i=m.findIndex(x=>x.date===date),d=m[i];
+  const diff=r2(d.alloc-d.spent);
+  if(Math.abs(diff)<0.005||i>=m.length-1){
+    S.closed[date]=true;saveLocalData();render();
+    return toast(i>=m.length-1&&Math.abs(diff)>=0.005?"Last budget day: balance updated, nothing to redistribute":"Day closed: spent exactly the budget");}
+  memo={date,diff,method:null};
+  const over=diff<0,amt=fm(Math.abs(diff));
+  openModal(`<h3>${fd(date)}</h3><p>${over?`You have exceeded today’s budget by ${amt}. How would you like to adjust your upcoming budget?`:`Great! You saved ${amt} today. What would you like to do with this amount?`}</p>
+  <button class="opt" id="o1" onclick="pickAdj('next')">${over?"Deduct from tomorrow":"Add to tomorrow"}</button>
+  <button class="opt" id="o2" onclick="pickAdj('spread')">Distribute across remaining days (${m.length-i-1})</button>
+  <p id="pv" class="k">Pick an option to preview the revised budget.</p>
+  <div class="row"><button onclick="closeModal()">Later</button><button onclick="skipAdj()">No adjustment</button><button class="p" onclick="confirmAdjust()">Confirm</button></div>`);
+}
+function pickAdj(method){
+  memo.method=method;$("o1").classList.toggle("on",method==="next");$("o2").classList.toggle("on",method==="spread");
+  const date=memo.date,m=calculateMonthlyBudget(mk(date),{date,method,type:"adj"}),i=m.findIndex(x=>x.date===date),b=m.slice(i+1);
+  const t=b[0];
+  $("pv").innerHTML=method==="next"?`Tomorrow’s budget becomes <b>${fm(t.alloc)}</b> (was ${fm(t.alloc-memo.diff)}).`:`New daily budget for the next ${b.length} days: <b>${fm(t.alloc)}</b> (was ${fm(t.alloc-memo.diff/b.length)}).`;
+}
+function skipAdj(){S.closed[memo.date]=true;saveLocalData();closeModal();render();toast("Day closed without adjustment")}
+function confirmAdjust(){
+  if(!memo||!memo.method)return toast("Choose an option first");
+  const {date,diff,method}=memo,m=calculateMonthlyBudget(mk(date)),i=m.findIndex(x=>x.date===date);
+  S.adjHist=S.adjHist.filter(h=>!(h.date===date&&h.type!=="fix"));
+  S.adjHist.push({id:Date.now()+"",date,type:diff<0?"overspend":"savings",method,amount:Math.abs(diff),affectedDates:method==="next"?[m[i+1].date]:m.slice(i+1).map(x=>x.date),createdAt:new Date().toISOString()});
+  S.closed[date]=true;saveLocalData();closeModal();render();toast("Budget adjusted");
+}
+const handleOverspending=openAdjust,handleSavings=openAdjust;
+function adjustNextDayBudget(date){memo={date,diff:getDay(date).rem,method:"next"};confirmAdjust()}
+function redistributeBudget(date){memo={date,diff:getDay(date).rem,method:"spread"};confirmAdjust()}
+function fixDeficit(date){
+  S.adjHist.push({id:Date.now()+"",date,type:"fix",method:"spread",amount:0,affectedDates:[],createdAt:new Date().toISOString()});
+  saveLocalData();render();toast("Deficit spread across remaining days")}
+
+/* ---------- expenses ---------- */
+function afterChange(date){
+  if(S.closed[date]&&!S.adjHist.some(h=>h.date===date&&h.type!=="fix"))delete S.closed[date];
+  saveLocalData();render();
+}
+function addExpense(){
+  const desc=$("fd").value.trim(),amt=parseFloat($("fa").value),date=$("ft").value;
+  if(!desc||!(amt>0)||!date)return toast("Enter description, a positive amount and a date");
+  const now=new Date().toISOString();
+  S.expenses.push({id:Date.now()+""+Math.random().toString(36).slice(2,5),date,description:desc,amount:r2(amt),createdAt:now,updatedAt:now});
+  afterChange(date);toast("Expense added");view="dash";render();
+}
+function editForm(id){
+  const e=S.expenses.find(x=>x.id===id);
+  openModal(`<h3>Edit expense</h3><label>Description</label><input id="ed" value="${esc(e.description)}"><label>Amount</label><input id="ea" type="number" step="0.01" value="${e.amount}"><label>Date</label><input id="et" type="date" value="${e.date}"><div class="row" style="margin-top:12px"><button onclick="closeModal()">Cancel</button><button class="p" onclick="editExpense('${id}')">Save</button></div>`)}
+function editExpense(id){
+  const e=S.expenses.find(x=>x.id===id),desc=$("ed").value.trim(),amt=parseFloat($("ea").value),date=$("et").value;
+  if(!desc||!(amt>0)||!date)return toast("Invalid values");
+  const old=e.date;Object.assign(e,{description:desc,amount:r2(amt),date,updatedAt:new Date().toISOString()});
+  closeModal();afterChange(old);if(old!==date)afterChange(date);toast("Expense updated");
+}
+function deleteExpense(id){ask("Delete this expense?",()=>{const e=S.expenses.find(x=>x.id===id);S.expenses=S.expenses.filter(x=>x.id!==id);afterChange(e.date);toast("Deleted")})}
+function dayDetail(date){
+  const d=getDay(date),ex=S.expenses.filter(e=>e.date===date);
+  openModal(`<h3>${fd(date)}</h3>${d?`<p class="k">Budget ${fm(d.alloc)} · Spent ${fm(d.spent)} · <span class="${d.spent<=0?"n":d.rem>=0?"g":"r"}">${d.rem>=0?"Left "+fm(d.rem):"Over "+fm(-d.rem)}</span></p>`:`<p class="k">No budget covers this date.</p>`}
+  ${ex.map(e=>`<div class="ex"><div>${esc(e.description)}<br><b>${fm(e.amount)}</b></div><div class="row"><button class="s" onclick="editForm('${e.id}')">Edit</button><button class="s d" onclick="deleteExpense('${e.id}')">Delete</button></div></div>`).join("")||'<p class="k">No expenses recorded.</p>'}
+  <div class="row" style="margin-top:12px"><button onclick="closeModal()">Close</button><button class="p" onclick="closeModal();view='add';window._ad='${date}';render()">Add expense</button></div>`)}
+
+/* ---------- views ---------- */
+const TABS=[["dash","Dashboard"],["add","Add"],["hist","History"],["cal","Calendar"],["exp","Export"],["set","Settings"]];
+function curKey(){const t=mk(today());if(S.month&&S.budgets[S.month])return S.month;if(S.budgets[t])return t;return Object.keys(S.budgets).sort().pop()||null}
+function render(){applyTheme();$("fab").style.display=(view==="add"||view==="setup")?"none":"flex";
+  $("nav").innerHTML=TABS.map(([k,l])=>`<button class="${view===k?"on":""}" onclick="go('${k}')">${l}</button>`).join("");
+  const key=curKey();$("nav").style.display=key?"flex":"none";
+  if(!key&&view!=="setup")view="setup";
+  ({setup:renderSetup,dash:renderDashboard,add:renderAdd,hist:renderExpenseHistory,cal:renderCalendar,exp:renderExport,set:renderSettings})[view](key);
+}
+function go(v){view=v;render()}
+function renderSetup(){
+  const t=new Date(),k=mk(today()),editing=busy&&S.budgets[busy]?S.budgets[busy]:null;
+  $("app").innerHTML=`<h2>${editing?"Edit monthly budget":"Set up your budget"}</h2><div class="card"><label>Month and year</label><input id="sm" type="month" value="${editing?busy:k}" ${editing?"disabled":""}>
+  <label>Monthly budget (${S.cur})</label><input id="sa" type="number" step="0.01" min="1" value="${editing?editing.total:""}" placeholder="30000">
+  <label>Start date (optional)</label><input id="ss" type="date" value="${editing?editing.start:""}">
+  <p class="k" id="sp"></p><div class="row"><button class="p" onclick="saveBudget()">${editing?"Save and recalculate":"Start tracking"}</button>${Object.keys(S.budgets).length?'<button onclick="busy=null;go(\'dash\')">Cancel</button>':""}</div></div>`;
+  ["sm","sa","ss"].forEach(i=>$(i).oninput=setPreview);setPreview();
+}
+function setPreview(){
+  const m=$("sm").value,a=parseFloat($("sa").value);if(!m)return;const [y,mo]=m.split("-").map(Number);
+  const start=$("ss").value&&mk($("ss").value)===m?$("ss").value:m+"-01",n=dim(y,mo)-Number(start.slice(8))+1;
+  $("sp").textContent=a>0?`${n} budget days → initial daily allowance ${fm(a/n)}`:`${n} days in budget period`;
+}
+function saveBudget(){
+  const m=$("sm").value,a=parseFloat($("sa").value);if(!m||!(a>0))return toast("Enter month and a positive budget");
+  const [y,mo]=m.split("-").map(Number);let start=$("ss").value||m+"-01";
+  if(mk(start)!==m)return toast("Start date must be inside the selected month");
+  const b={month:mo,year:y,totalBudget:a,total:a,start,end:m+"-"+pad(dim(y,mo))};b.initialDailyBudget=r2(a/budgetDates(b).length);
+  const go2=()=>{S.budgets[m]=b;S.month=m;busy=null;saveLocalData();view="dash";render();toast("Budget saved")};
+  if(S.budgets[m])ask(`This recalculates all daily allowances for ${m}, including adjustments already made. Continue?`,go2);else go2();
+}
+function renderDashboard(key){
+  const m=calculateMonthlyBudget(key),b=S.budgets[key],t=today();
+  let i=m.findIndex(d=>d.date===t);const inMonth=i>=0;if(!inMonth)i=t<b.start?0:m.length-1;
+  const d=m[i],spentAll=r2(m.reduce((a,x)=>a+x.spent,0)),left=b.total-spentAll,dl=m.length-i,st=stat(d),nx=m[i+1];
+  const pct=d.alloc>0?Math.min(100,d.spent/d.alloc*100):(d.spent>0?100:0),pend=pendingDay(key);
+  $("app").innerHTML=`<h2>${new Date(+key.slice(0,4),+key.slice(5)-1).toLocaleString("en-GB",{month:"long",year:"numeric"})}</h2>
+  ${pend?`<div class="banner">${fd(pend.date)} isn’t closed yet (${pend.rem>=0?"saved "+fm(pend.rem):"over by "+fm(-pend.rem)}). <button class="s p" onclick="openAdjust('${pend.date}')">Review</button></div>`:""}
+  ${nx&&nx.alloc<0?`<div class="banner">Tomorrow’s budget is in deficit by ${fm(-nx.alloc)}. <button class="s p" onclick="fixDeficit('${nx.date}')">Spread across remaining days</button></div>`:""}
+  <div class="card hero ${st}"><div class="k">${inMonth?"Today’s":fd(d.date)} budget</div><div class="big">${fm(d.alloc)}</div>
+  <div class="bar"><i style="width:${pct}%"></i></div>
+  <div class="row" style="justify-content:space-around"><div><div class="k">Spent</div><b>${fm(d.spent)}</b></div><div><div class="k">${d.rem>=0?"Remaining":"Over by"}</div><b class="${d.rem>=0?"":"r"}">${fm(Math.abs(d.rem))}</b></div><div><div class="k">Used</div><b>${Math.round(d.alloc>0?d.spent/d.alloc*100:0)}%</b></div></div>
+  ${inMonth&&!d.closed?`<p><button class="p" onclick="openAdjust('${d.date}')">Finish today’s spending</button></p>`:d.closed&&d.out?`<p class="k">Adjustment applied: ${d.out.type} ${fm(d.out.amount)} → ${d.out.method==="next"?"next day":"remaining days"}</p>`:""}</div>
+  <div class="grid"><div class="card"><div class="k">Monthly budget</div><div class="v">${fm(b.total)}</div></div><div class="card"><div class="k">Total spent</div><div class="v">${fm(spentAll)}</div></div>
+  <div class="card"><div class="k">Remaining</div><div class="v ${left<0?"r":""}">${fm(left)}</div></div><div class="card"><div class="k">Days left</div><div class="v">${dl}</div></div>
+  ${nx?`<div class="card"><div class="k">Next day’s budget</div><div class="v ${nx.alloc<0?"r":""}">${fm(nx.alloc)}</div></div>`:""}</div>
+  <div class="card"><h3>Today’s expenses</h3>${S.expenses.filter(e=>e.date===d.date).map(e=>`<div class="ex"><span>${esc(e.description)}</span><b>${fm(e.amount)}</b></div>`).join("")||'<span class="k">None yet</span>'}</div>`;
+}
+function renderAdd(){
+  const dt=window._ad||today();window._ad=null;
+  $("app").innerHTML=`<h2>Add expense</h2><div class="card"><label>Description</label><input id="fd" placeholder="Lunch"><label>Amount (${S.cur})</label><input id="fa" type="number" step="0.01" min="0" inputmode="decimal" placeholder="150"><label>Date</label><input id="ft" type="date" value="${dt}"><p><button class="p" onclick="addExpense()">Add expense</button></p></div>`;
+  $("fa").onkeydown=e=>{if(e.key==="Enter")addExpense()};
+}
+function rangeFor(f){
+  const t=today(),dow=(pd(t).getDay()+6)%7;
+  if(f==="today")return[t,t];if(f==="yesterday")return[addD(t,-1),addD(t,-1)];
+  if(f==="week")return[addD(t,-dow),addD(t,6-dow)];
+  if(f==="custom")return[window._hs||t,window._he||t];
+  const k=mk(t),[y,m]=k.split("-").map(Number);return[k+"-01",k+"-"+pad(dim(y,m))];
+}
+function renderExpenseHistory(key){
+  const [a,b]=rangeFor(hf);let rows="";
+  for(let d=b;d>=a;d=addD(d,-1)){
+    const x=getDay(d),sp=x?x.spent:calculateDailySpending(d);if(!x&&!sp)continue;
+    const c=x?stat(x):"n",adj=x?[x.inn?`${x.inn>0?"+":""}${fm(x.inn)} in`:"",x.out?`${x.out.type} ${fm(x.out.amount)} → ${x.out.method==="next"?"next":"spread"}`:""].filter(Boolean).join("<br>")||"—":"—";
+    rows+=`<tr class="c" onclick="dayDetail('${d}')"><td>${fd(d)}</td><td>${x?fm(x.alloc):"—"}</td><td class="${c}">${fm(sp)}</td><td class="${x?(sp<=0?"n":x.rem>=0?"g":"r"):"n"}">${x?(sp<=0?"No spend":x.rem>=0?fm(x.rem):"−"+fm(-x.rem)):"—"}</td><td>${adj}</td></tr>`;
+    if(rows.length>400000)break;
+  }
+  $("app").innerHTML=`<h2>History</h2><div class="card"><select id="hf" onchange="hf=this.value;render()">${[["today","Today"],["yesterday","Yesterday"],["week","This week"],["month","This month"],["custom","Custom range"]].map(([k,l])=>`<option value="${k}" ${hf===k?"selected":""}>${l}</option>`).join("")}</select>
+  ${hf==="custom"?`<div class="row"><input type="date" value="${a}" onchange="window._hs=this.value;render()"><input type="date" value="${b}" onchange="window._he=this.value;render()"></div>`:""}</div>
+  <div class="card sw"><table><tr><th>Date</th><th>Budget</th><th>Spent</th><th>Left / over</th><th>Adjustment</th></tr>${rows||'<tr><td colspan="5" class="k">No days with a budget or expenses in this range.</td></tr>'}</table></div>`;
+}
+function renderCalendar(key){
+  const m=calculateMonthlyBudget(key),[y,mo]=key.split("-").map(Number),first=(new Date(y,mo-1,1).getDay()+6)%7,t=today();
+  let h=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(x=>`<b>${x}</b>`).join("")+"<div></div>".repeat(first);
+  for(let d=1;d<=dim(y,mo);d++){const ds=key+"-"+pad(d),x=m.find(q=>q.date===ds),c=x?stat(x):"n",sp=calculateDailySpending(ds);
+    h+=`<div class="cd ${c} ${ds===t?"t":""}" onclick="dayDetail('${ds}')"><span>${d}</span>${sp?fm(sp).replace(/\.00$/,""):""}${x?`<br><small class="k">/${Math.round(x.alloc)}</small>`:""}</div>`}
+  $("app").innerHTML=`<h2>Calendar</h2><div class="card"><div class="cal">${h}</div><p class="k">Green: under budget · Red: over · Grey: no expenses</p></div>`;
+}
+function renderExport(){
+  const t=today(),k=mk(t);
+  $("app").innerHTML=`<h2>Export to Excel</h2><div class="card"><label>Start date</label><input id="xs" type="date" value="${k}-01"><label>End date</label><input id="xe" type="date" value="${t}"><p><button class="p" onclick="exportToExcel()">Export .xlsx</button></p><p class="k">Sheets: Expense Details, Daily Summary, plus Monthly Summary when full months are covered. Needs the Excel library to have loaded (internet on first load).</p></div>`;
+}
+function renderSettings(key){
+  const b=S.budgets[key];
+  $("app").innerHTML=`<h2>Settings</h2><div class="card"><h3>Month</h3><select onchange="S.month=this.value;saveLocalData();render()">${Object.keys(S.budgets).sort().map(k=>`<option ${k===key?"selected":""}>${k}</option>`).join("")}</select>
+  <div class="row" style="margin-top:8px"><button onclick="busy='${key}';go('setup')">Edit budget (${fm(b.total)})</button><button onclick="busy=null;go('setup')">New month</button></div></div>
+  <div class="card"><h3>Currency</h3><select onchange="S.cur=this.value;saveLocalData();render()">${["₹","$","€","£","¥","AED ","SGD "].map(c=>`<option ${c===S.cur?"selected":""}>${c}</option>`).join("")}</select></div>
+  <div class="card"><h3>Data</h3><div class="row"><button onclick="backupData()">Backup (JSON)</button><button onclick="$('rf').click()">Restore backup</button><button class="d" onclick="resetData()">Reset all data</button></div><input id="rf" type="file" accept=".json,application/json" hidden onchange="restoreData(this.files[0])"></div>`;
+}
+
+/* ---------- export / backup ---------- */
+async function dl(filename,data){
+  const d=window.claude?await claude.use("downloads"):null;
+  if(d){try{await d.save({filename,data})}catch(e){if(e&&e.code!=="declined")toast("Download unavailable")}return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data]));a.download=filename;a.click();
+}
+function exportToExcel(){
+  if(!window.XLSX)return toast("Excel library not loaded (check connection)");
+  const a=$("xs").value,b=$("xe").value;if(!a||!b||a>b)return toast("Pick a valid date range");
+  const cur=`"${S.cur.trim()}"#,##0.00`,det=[["Date","Expense Description","Expense Amount","Daily Allocated Budget","Total Daily Spending","Daily Remaining Amount","Overspending Amount","Budget Adjustment Type","Adjusted Daily Budget"]],sum=[["Date","Daily Allocated Budget","Total Daily Spending","Daily Remaining Amount","Overspending Amount","Budget Adjustment Type","Adjusted Daily Budget","Expenses"]];
+  const adjT=x=>x&&x.out?`${x.out.type} → ${x.out.method==="next"?"Next day":"Distributed"}`:"None";
+  for(let d=a;d<=b;d=addD(d,1)){
+    const x=getDay(d),sp=calculateDailySpending(d),ex=S.expenses.filter(e=>e.date===d),dt=pd(d);
+    const al=x?r2(x.alloc):null,rem=x?r2(x.alloc-sp):null,ov=x&&sp>x.alloc?r2(sp-x.alloc):0;
+    ex.forEach(e=>det.push([dt,e.description,e.amount,al,sp,rem,ov,adjT(x),al]));
+    sum.push([dt,x?r2(x.base+0):null,sp,rem,ov,adjT(x),al,ex.length]);
+    if(x)sum[sum.length-1][1]=al;
+  }
+  const fmtSheet=(rows,dc,cc)=>{const ws=XLSX.utils.aoa_to_sheet(rows,{cellDates:true});
+    for(let r=1;r<rows.length;r++){dc.forEach(c=>{const x=ws[XLSX.utils.encode_cell({r,c})];if(x)x.z="dd-mmm-yyyy"});cc.forEach(c=>{const x=ws[XLSX.utils.encode_cell({r,c})];if(x&&x.t==="n")x.z=cur})}
+    ws["!cols"]=rows[0].map(()=>({wch:20}));return ws};
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,fmtSheet(det,[0],[2,3,4,5,6,8]),"Expense Details");
+  XLSX.utils.book_append_sheet(wb,fmtSheet(sum,[0],[1,2,3,4,6]),"Daily Summary");
+  const ms=[["Month","Monthly Budget","Total Spent","Remaining","Days Overspent","Days Under Budget"]];
+  Object.keys(S.budgets).sort().forEach(k=>{const bb=S.budgets[k];if(bb.start>a||bb.end>b||a>k+"-01")return;
+    const m=calculateMonthlyBudget(k),sp=m.reduce((q,x)=>q+x.spent,0);ms.push([k,bb.total,r2(sp),r2(bb.total-sp),m.filter(x=>x.spent>x.alloc+0.005).length,m.filter(x=>x.spent>0&&x.spent<=x.alloc+0.005).length])});
+  if(ms.length>1){const w=XLSX.utils.aoa_to_sheet(ms);for(let r=1;r<ms.length;r++)[1,2,3].forEach(c=>{const x=w[XLSX.utils.encode_cell({r,c})];if(x)x.z=cur});w["!cols"]=ms[0].map(()=>({wch:18}));XLSX.utils.book_append_sheet(wb,w,"Monthly Summary")}
+  dl(`daily-budget_${a}_to_${b}.xlsx`,XLSX.write(wb,{bookType:"xlsx",type:"array",cellDates:true}));
+}
+function backupData(){dl(`daily-budget-backup_${today()}.json`,JSON.stringify(S,null,2))}
+function restoreData(f){
+  if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const o=JSON.parse(r.result);if(!o||typeof o.budgets!=="object"||!Array.isArray(o.expenses))throw 0;
+    ask("Restoring replaces all current data with this backup. Continue?",()=>{S=Object.assign(defState(),o);saveLocalData();view="dash";render();toast("Backup restored")})}catch(e){toast("Invalid backup file")}};
+  r.readAsText(f);
+}
+function resetData(){ask("Delete ALL budgets, expenses and history? This cannot be undone.",()=>{S=defState();saveLocalData();view="setup";render();toast("Data reset")})}
+
+function isDark(){const t=document.documentElement.dataset.theme;return t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches}
+function applyTheme(){if(S&&S.theme)document.documentElement.dataset.theme=S.theme;$("tg").textContent=isDark()?"☀️":"🌙"}
+function toggleTheme(){S.theme=isDark()?"light":"dark";saveLocalData();applyTheme()}
+function initializeApp(){loadLocalData();view=curKey()?"dash":"setup";render()}
+initializeApp();
+if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+</script></body></html>
